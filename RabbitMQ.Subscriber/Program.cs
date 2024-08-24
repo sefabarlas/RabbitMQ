@@ -12,16 +12,34 @@ var connectionFactory = new ConnectionFactory
 using var connection = connectionFactory.CreateConnection();
 
 var channel = connection.CreateModel();
-// channel.QueueDeclare("hello-queue", true, false, false);
+// channel.ExchangeDeclare("logs-fanout", durable: true, type: ExchangeType.Fanout);
+
+var randomQueueName = channel.QueueDeclare().QueueName;
+
+//Makes the queue permanent.
+#region Permanent Queue
+
+// var randomQueueName = "log-database-save-queue";
+// channel.QueueDeclare(randomQueueName, true, false, false); 
+
+#endregion
+
+channel.QueueBind(randomQueueName,  "logs-fanout", "", null);
 channel.BasicQos(0, 1, false);
+
 var consumer = new EventingBasicConsumer(channel);
-channel.BasicConsume("hello-queue", false, consumer);
+
+Console.WriteLine("The logs are listening...");
 
 consumer.Received += (sender, eventArgs) =>
 {
     var message = Encoding.UTF8.GetString(eventArgs.Body.ToArray());
-    Console.WriteLine("Gelen Mesaj: " + message);
+    
+    Thread.Sleep(1500);
+    Console.WriteLine("Incoming message: " + message);
     channel.BasicAck(eventArgs.DeliveryTag, false);
 };
+
+channel.BasicConsume(randomQueueName, false, consumer);
 
 Console.ReadLine();

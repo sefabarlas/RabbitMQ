@@ -11,15 +11,15 @@ var connectionFactory = new ConnectionFactory
 using var connection = connectionFactory.CreateConnection();
 
 var channel = connection.CreateModel();
-channel.QueueDeclare("hello-queue", true, false, false);
+channel.ExchangeDeclare("logs-fanout", durable: true, type: ExchangeType.Fanout);
 
 Enumerable.Range(1, 50).ToList().ForEach(x =>
 {
-    var message = $"Message {x}";
+    var message = $"log {x}";
     var messageBody = Encoding.UTF8.GetBytes(message);
 
-    channel.BasicPublish(string.Empty, "hello-queue", null, messageBody);
-    Console.WriteLine($"Mesaj Gönderildi: {message}");
+    channel.BasicPublish("logs-fanout", "", null, messageBody);
+    Console.WriteLine($"Message sent: {message}");
 });
 
 Console.ReadLine();
