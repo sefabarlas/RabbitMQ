@@ -1,0 +1,19 @@
+bin/
+obj/
+/packages/
+riderModule.iml
+/_ReSharper.Caches/
+
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# IDEs and editors
+**/.idea
+**/*.project
+**/*.classpath
+**/*.c9/
+**/*.launch
+**/*.settings/
+**/*.sublime-workspace
